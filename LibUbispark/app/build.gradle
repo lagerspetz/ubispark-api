@@ -5,15 +5,25 @@ android {
     buildToolsVersion "25.0.2"
     defaultConfig {
         applicationId "fi.helsinki.cs.nodes.libubispark"
-        minSdkVersion 15
         targetSdkVersion 25
+        multiDexEnabled true
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+    productFlavors{
+        dev {
+            // Enable pre-dexing to produce an APK that can be tested on
+            // Android 5.0+ without the time-consuming DEX build processes.
+            minSdkVersion 21
+        }
+        prod {
+            minSdkVersion 16
+        }
+    }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -26,6 +36,8 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:25.1.1'
     compile 'com.android.support:design:25.1.1'
+    compile 'com.android.support:multidex:1.0.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.0-beta5'
+    compile 'org.scaloid:scaloid_2.11:4.2+'
     testCompile 'junit:junit:4.12'
 }
