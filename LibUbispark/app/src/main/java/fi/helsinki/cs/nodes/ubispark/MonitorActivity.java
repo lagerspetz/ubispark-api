@@ -14,15 +14,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.Callable;
 
-import fi.helsinki.cs.nodes.libubispark.LocalRunnerJava;
+import fi.helsinki.cs.nodes.libubispark.LocalRunner;
 import java.util.concurrent.ForkJoinTask;
 
 public class MonitorActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private LocalRunnerJava runner;
+    private LocalRunner runner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,23 +92,41 @@ public class MonitorActivity extends AppCompatActivity
 
         if (id == R.id.nav_camera) {
             // Handle the camera action
-            if (runner == null)
-                runner = new LocalRunnerJava(4);
-            Callable<Double> task = new Callable<Double>() {
-                @Override
-                public Double call() throws Exception {
-                    return Math.random();
-                }
-            };
-            final ForkJoinTask<Double> output = runner.scheduleTask(task);
-
-            runOnUiThread(new Runnable() {
-                @Override
+            new Thread() {
                 public void run() {
-                    double op = output.join();
-                    ((TextView) findViewById(R.id.textView)).setText(op + "");
+                    if (runner == null)
+                        runner = new LocalRunner(4);
+                    int max = 10000;
+                    List<Callable<Double>> items = new LinkedList<Callable<Double>>();
+                    for (int i = 0; i < max; i++)
+                        items.add(new Callable<Double>() {
+                            @Override
+                            public Double call() throws Exception {
+                                return Math.random();
+                            }
+                        });
+                    final List<ForkJoinTask<Double>> outputs = new LinkedList<>();
+                    for (Callable<Double> it : items) {
+                        outputs.add(runner.scheduleTask(it));
+                    }
+
+                    new Thread(){
+                        public void run() {
+                            for (ForkJoinTask<Double> task : outputs) {
+                                final double res = task.join();
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                            final TextView tv = ((TextView) findViewById(R.id.textView));
+                                            tv.setText(tv.getText() + " " + res + "");
+                                        }
+                                });
+                            }
+                        }
+                    }.start();
+
                 }
-            });
+            }.start();
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
