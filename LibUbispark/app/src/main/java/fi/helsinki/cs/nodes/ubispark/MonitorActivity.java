@@ -1,4 +1,4 @@
-package fi.helsinki.cs.nodes.libubispark;
+package fi.helsinki.cs.nodes.ubispark;
 
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;

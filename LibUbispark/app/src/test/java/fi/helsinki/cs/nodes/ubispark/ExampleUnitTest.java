@@ -1,4 +1,4 @@
-package fi.helsinki.cs.nodes.libubispark;
+package fi.helsinki.cs.nodes.ubispark;
 
 import org.junit.Test;
 
