@@ -12,9 +12,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
+
+import java.util.concurrent.Callable;
+
+import fi.helsinki.cs.nodes.libubispark.LocalRunnerJava;
+import java.util.concurrent.ForkJoinTask;
 
 public class MonitorActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private LocalRunnerJava runner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +90,23 @@ public class MonitorActivity extends AppCompatActivity
 
         if (id == R.id.nav_camera) {
             // Handle the camera action
+            if (runner == null)
+                runner = new LocalRunnerJava(4);
+            Callable<Double> task = new Callable<Double>() {
+                @Override
+                public Double call() throws Exception {
+                    return Math.random();
+                }
+            };
+            final ForkJoinTask<Double> output = runner.scheduleTask(task);
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    double op = output.join();
+                    ((TextView) findViewById(R.id.textView)).setText(op + "");
+                }
+            });
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
@@ -97,5 +122,9 @@ public class MonitorActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public double squareSum() {
+        return Math.pow(Math.random(), 2);
     }
 }

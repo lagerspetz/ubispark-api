@@ -27,6 +27,8 @@
     public protected *;
 }
 
+-keep class fi.helsinki.cs.nodes.libubispark.**  { *; }
+
 
 # this can be omitted if current Android Build target is android-16
 -dontwarn org.scaloid.**
