@@ -97,7 +97,7 @@ public class MonitorActivity extends AppCompatActivity
                     if (runner == null)
                         runner = new LocalRunner(4);
                     int max = 10000;
-                    List<Callable<Double>> items = new LinkedList<Callable<Double>>();
+                    List<Callable<Double>> items = new LinkedList<>();
                     for (int i = 0; i < max; i++)
                         items.add(new Callable<Double>() {
                             @Override
