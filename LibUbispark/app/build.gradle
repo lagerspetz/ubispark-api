@@ -18,7 +18,8 @@ android {
             minSdkVersion 21
         }
         prod {
-            minSdkVersion 16
+            // Should be 16 but build is failing in the console with that, but succeeding here in Android Studio.
+            minSdkVersion 21
         }
     }
     buildTypes {
