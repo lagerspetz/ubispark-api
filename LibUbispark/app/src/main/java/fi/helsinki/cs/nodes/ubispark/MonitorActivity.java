@@ -14,17 +14,32 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import org.apache.spark.SparkConf;
+import org.apache.spark.SparkContext;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.rdd.RDD;
+
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
 import fi.helsinki.cs.nodes.libubispark.LocalRunner;
+import scala.Function1;
+import scala.Function2;
+import scala.Tuple2;
+import scala.collection.immutable.Range;
+import scala.collection.immutable.Seq;
+
 import java.util.concurrent.ForkJoinTask;
 
 public class MonitorActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private LocalRunner runner;
+
+    private JavaSparkContext sc;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +65,7 @@ public class MonitorActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        sc = new JavaSparkContext(new SparkConf().setAppName("Ubispark Monitor").setMaster("local[2]"));
     }
 
     @Override
@@ -92,41 +108,7 @@ public class MonitorActivity extends AppCompatActivity
 
         if (id == R.id.nav_camera) {
             // Handle the camera action
-            new Thread() {
-                public void run() {
-                    if (runner == null)
-                        runner = new LocalRunner(4);
-                    int max = 10000;
-                    List<Callable<Double>> items = new LinkedList<>();
-                    for (int i = 0; i < max; i++)
-                        items.add(new Callable<Double>() {
-                            @Override
-                            public Double call() throws Exception {
-                                return Math.random();
-                            }
-                        });
-                    final List<ForkJoinTask<Double>> outputs = new LinkedList<>();
-                    for (Callable<Double> it : items) {
-                        outputs.add(runner.scheduleTask(it));
-                    }
-
-                    new Thread(){
-                        public void run() {
-                            for (ForkJoinTask<Double> task : outputs) {
-                                final double res = task.join();
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                            final TextView tv = ((TextView) findViewById(R.id.textView));
-                                            tv.setText(tv.getText() + " " + res + "");
-                                        }
-                                });
-                            }
-                        }
-                    }.start();
-
-                }
-            }.start();
+            scTest();
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
@@ -142,6 +124,66 @@ public class MonitorActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void scTest() {
+        List<Integer> list = new ArrayList<>();
+        for (int i = 0; i < 10000; i++){
+            list.add(i);
+        }
+        JavaRDD<Integer> paral = sc.parallelize(list, 100);
+
+        final Integer output = paral.reduce(new org.apache.spark.api.java.function.Function2<Integer, Integer, Integer>() {
+            @Override
+            public Integer call(Integer integer, Integer integer2) throws Exception {
+                return integer + integer2;
+            }
+        });
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                final TextView tv = ((TextView) findViewById(R.id.textView));
+                tv.setText(tv.getText() + " " + output + "");
+            }
+        });
+    }
+
+    private void localRunnerTest() {
+        new Thread() {
+            public void run() {
+                if (runner == null)
+                    runner = new LocalRunner(4);
+                int max = 10000;
+                List<Callable<Double>> items = new LinkedList<>();
+                for (int i = 0; i < max; i++)
+                    items.add(new Callable<Double>() {
+                        @Override
+                        public Double call() throws Exception {
+                            return Math.random();
+                        }
+                    });
+                final List<ForkJoinTask<Double>> outputs = new LinkedList<>();
+                for (Callable<Double> it : items) {
+                    outputs.add(runner.scheduleTask(it));
+                }
+
+                new Thread(){
+                    public void run() {
+                        for (ForkJoinTask<Double> task : outputs) {
+                            final double res = task.join();
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    final TextView tv = ((TextView) findViewById(R.id.textView));
+                                    tv.setText(tv.getText() + " " + res + "");
+                                }
+                            });
+                        }
+                    }
+                }.start();
+
+            }
+        }.start();
     }
 
     public double squareSum() {
