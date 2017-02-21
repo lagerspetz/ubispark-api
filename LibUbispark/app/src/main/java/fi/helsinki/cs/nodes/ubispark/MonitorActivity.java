@@ -65,7 +65,6 @@ public class MonitorActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        sc = new JavaSparkContext(new SparkConf().setAppName("Ubispark Monitor").setMaster("local[2]"));
     }
 
     @Override
@@ -108,6 +107,7 @@ public class MonitorActivity extends AppCompatActivity
 
         if (id == R.id.nav_camera) {
             // Handle the camera action
+        sc = new JavaSparkContext(new SparkConf().setAppName("Ubispark Monitor").setMaster("local[2]"));
             scTest();
         } else if (id == R.id.nav_gallery) {
 
