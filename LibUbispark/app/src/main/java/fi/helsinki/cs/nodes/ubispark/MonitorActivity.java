@@ -39,8 +39,6 @@ public class MonitorActivity extends AppCompatActivity
 
     private LocalRunner runner;
 
-    private JavaSparkContext sc;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -107,8 +105,7 @@ public class MonitorActivity extends AppCompatActivity
 
         if (id == R.id.nav_camera) {
             // Handle the camera action
-        sc = new JavaSparkContext(new SparkConf().setAppName("Ubispark Monitor").setMaster("local[2]"));
-            scTest();
+            localRunnerTest();
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
@@ -127,7 +124,7 @@ public class MonitorActivity extends AppCompatActivity
     }
 
     private void scTest() {
-        List<Integer> list = new ArrayList<>();
+      /*  List<Integer> list = new ArrayList<>();
         for (int i = 0; i < 10000; i++){
             list.add(i);
         }
@@ -145,7 +142,7 @@ public class MonitorActivity extends AppCompatActivity
                 final TextView tv = ((TextView) findViewById(R.id.textView));
                 tv.setText(tv.getText() + " " + output + "");
             }
-        });
+        });*/
     }
 
     private void localRunnerTest() {
